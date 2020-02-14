@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <link rel="stylesheet" href="bootstrap/css/bootstrap.css">
+    <script src="js/jquery-3.4.1.min.js"></script>
+    <script src="bootstrap/js/bootstrap.js"></script>
+</head>
+
+<body>
+
+    <form name="form1">
+        <input type="file" class="form-control-file" id="avatar" name="avatar" accept="image/*" style="display: none">
+    </form>
+    <button type="button" class="btn btn-success sel-file">Select image file</button>
+    <br>
+    <img src="" alt="">
+
+    <script>
+        const $avatar = $('#avatar');
+
+        $('.sel-file').click(function () {
+            $avatar.click();
+        });
+
+        $avatar.change(function () {
+            console.log($avatar[0].files[0]);
+
+            //建立一個新物件 html 5 API
+            const reader = new FileReader();
+
+            //1.其中的方法可以讀取檔案的的url -base64
+            reader.readAsDataURL($avatar[0].files[0]);
+
+            //2.對這個物件綁一個監聽- load , 上面的方法讀完之後會觸發這個load事件
+            reader.addEventListener('load', function (event) {
+                console.log(event)
+                //3.取得 event 的結果
+                $('img').attr('src', event.target.result);
+            });
+
+            //1-2-3 是一個相依性 有1才有2 有2才有3
+
+        });
+
+
+    </script>
+</body>
+
+</html>

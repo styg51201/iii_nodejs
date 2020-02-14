@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <link rel="stylesheet" href="bootstrap/css/bootstrap.css">
+    <script src="js/jquery-3.4.1.min.js"></script>
+    <script src="bootstrap/js/bootstrap.js"></script>
+</head>
+<body>
+
+<form name="form1">
+    <input type="file" class="form-control-file" id="avatar" name="avatar"
+           accept="image/*"
+           style="display: none">
+</form>
+<button type="button" class="btn btn-success sel-file">Select image file</button>
+<br>
+<img src="" alt="">
+
+<script>
+    const $avatar = $('#avatar');
+
+    $('.sel-file').click(function(){
+        $avatar.click();
+    });
+
+    $avatar.change(function(){
+
+        console.log($avatar[0].files[0]);
+        
+        const fd = new FormData(document.form1);
+        fetch('/try-upload', {
+            method: 'POST',
+            body: fd
+        })
+            .then(r=>r.json())
+            .then(obj=>{
+                $('img').attr('src', obj.url);
+            });
+    });
+
+
+</script>
+</body>
+</html>

@@ -1,0 +1,28 @@
+<!-- 路徑是以相對路徑 -->
+<!-- ＜％－ 用來避免 HTML 跳脫 -->
+<%- include('parts/header') %>
+
+<%- include('navbar') %>
+
+<div class="container">
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th scope="col">ID</th>
+                <th scope="col">Name</th>
+                <th scope="col">Age</th>
+            </tr>
+        </thead>
+        <tbody>
+            <% for( let i=0 ; i < data.length ; i++ ) { %>
+            <tr>
+                <td> <%= data[i]['id'] %> </td>
+                <td> <%= data[i]['name'] %> </td>
+                <td> <%= data[i]['age'] %> </td>
+            </tr>
+            <% } %>
+        </tbody>
+    </table>
+</div>
+
+<%- include('parts/footer') %>

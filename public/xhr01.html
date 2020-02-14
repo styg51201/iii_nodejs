@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="zh">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+        content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+</head>
+
+<body>
+    <button>bbbbbbbb</button>
+    <br><button onclick="doAjax()">load</button>
+    <br>
+    <div id="info"></div>
+    <script>
+        const info = document.querySelector('#info');
+
+        function doAjax() {
+            var xhr = new XMLHttpRequest();
+            xhr.onreadystatechange = function () {
+                console.log(this.readyState, this.status);
+                if (this.readyState === 4 && this.status === 200) {
+                    info.innerHTML = this.responseText;
+                }
+            };
+            //true => 非同步 - 我先走了 掰 
+            //false => 同步 - 我要等你一起做
+            xhr.open('GET', '/sync-async', false);
+            xhr.send();
+        }
+
+    </script>
+</body>
+
+</html>

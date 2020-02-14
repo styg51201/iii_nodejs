@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+
+<body>
+    <script>
+        //resolve => 成功 -> .then
+        //reject => 失敗 -> catch
+        new Promise((resolve, reject) => {
+            setTimeout(() => {
+                resolve('abc');
+                // reject('error ---');  
+            }, 3000);
+        })
+            //result = abc
+            .then(result => {
+                console.log(result);
+                //把 abc 丟到下一個then
+                return result
+            })
+            .then(result => {
+                console.log(123, result);
+            })
+            //上面沒有return 這邊沒有result
+            .then(result => {
+                console.log(456, result);
+            })
+            .catch(error => {
+                console.log('Error: ', error)
+
+            })
+
+
+
+
+    </script>
+</body>
+
+</html>
