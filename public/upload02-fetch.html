@@ -55,7 +55,7 @@
                 body: fd
             })
                 //回傳是一個promise物件
-                // 只有兩條路走 1. .json() 轉成json  2. .text() 轉成文字
+                // 只有兩條路走 1. .json() 轉成json的Obj  2. .text() 轉成文字
                 .then(r => r.json())
                 .then(obj => console.log(obj));
 

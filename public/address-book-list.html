@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+
+<body>
+    <button>load</button>
+    <div id="info"></div>
+
+    <script>
+        document.querySelector('button').addEventListener('click', function (event) {
+            fetch('http://localhost:3000/address-book/list-api')
+                .then(r => r.text())
+                .then(txt => {
+                    document.querySelector('#info').innerHTML = txt;
+                })
+        });
+    </script>
+
+
+</body>
+
+</html>

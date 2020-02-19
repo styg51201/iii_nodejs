@@ -1,0 +1,87 @@
+<%- include('../parts/header') %>
+
+<%- include('../navbar') %>
+
+<div class="container">
+    <div class="row">
+        <div class="col">
+            <div id="info" class="alert alert-success" role="alert" style="display: none">
+
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-6">
+
+            <div class="card mt-5" style="">
+                <div class="card-body">
+                    <h5 class="card-title">新增資料</h5>
+                    <form name="form1" method="post" enctype="multipart/form-data" onsubmit="return formCheck()">
+                        <div class="form-group">
+                            <label for="name">姓名</label>
+                            <input type="text" class="form-control" id="name" name="name"
+                                value="<%= row.studentName %>">
+                        </div>
+                        <div class="form-group">
+                            <label for="gender">性別</label>
+                            <input type="text" class="form-control" id="gender" name="gender"
+                                value="<%= row.studentGender %>">
+                        </div>
+                        <div class="form-group">
+                            <label for="birthday">生日</label>
+                            <input type="text" class="form-control" id="birthday" name="birthday"
+                                value="<%= row.studentBirthday %>">
+                        </div>
+                        <div class="form-group">
+                            <label for="mobile">號碼</label>
+                            <input type="text" class="form-control" id="mobile" name="mobile"
+                                value="<%= row.studentPhoneNumber %>">
+                        </div>
+                        <div class="form-group">
+                            <label for="desc">介紹</label>
+                            <textarea class="form-control" name="desc" id="desc" cols="10"
+                                rows="5"><%= row.studentDescription %>"</textarea>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary">Submit</button>
+                    </form>
+
+                </div>
+            </div>
+        </div>
+        <script>
+            const info = $('#info');
+
+            function formCheck() {
+                info.hide();
+
+                // TODO: 送出前先檢查各必填欄位的格式或值
+
+                fetch('/address-book/edit/<%= row.id %>', {
+                    method: 'POST',
+                    //要送出整個表單欄位,但不想一個一個抓值
+                    //所以用FormData 包起來,傳送的方式就會要用 上傳檔案那個的類型(multipart/form-data)
+                    //所以後端就要用multer 的方式接收
+                    body: new FormData(document.form1),
+                })
+                    .then(r => r.json())
+                    .then(obj => {
+                        // console.log(obj);
+
+                        if (obj.success) {
+                            info.text('修改成功');
+                            info.removeClass('alert-danger').addClass('alert-success');
+                        } else {
+                            info.text(obj.error);
+                            info.removeClass('alert-success').addClass('alert-danger');
+                        }
+                        info.slideDown();
+                    })
+
+                return false;
+            }
+        </script>
+
+    </div>
+    <%- include('../parts/footer') %>

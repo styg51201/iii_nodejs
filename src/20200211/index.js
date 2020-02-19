@@ -13,6 +13,9 @@ const multer = require('multer')
 
 const db = require(__dirname + '/db_connect');
 
+//跨網域使用
+const cors = require('cors');
+
 // 設定上傳暫存目錄
 const upload = multer({ dest: 'tmp_uploads/' })
 
@@ -26,13 +29,37 @@ const upload = multer({ dest: 'tmp_uploads/' })
 //2. 建立 server 物件
 const app = express()
 
+const whitelist = [
+    'http://localhost:63342', //phpstone
+    'http://localhost:3000', //自己的主機也要加
+    'http://localhost:5500',
+    'http://127.0.0.1:5500', //vs code 
+    undefined, //有時候會把主機判斷成是undefined
+];
+
+const corsOptions = {
+    credentials: true,
+    origin: function (origin, callback) {
+        console.log('origin:', origin);
+        if (whitelist.indexOf(origin) !== -1) {
+            callback(null, true); // true允許拜訪
+        } else {
+            callback(null, false); // 不允許
+        }
+    }
+};
+//跨網域使用
+app.use(cors(corsOptions));
+
+
 // 註冊樣版引擎  後面是.ejs檔
 app.set('view engine', 'ejs')
 
 // top level middleware , 進到路由前就解析 
-app.use(bodyParser.urlencoded({ extended: false }));
-// 兩種解析功能： urlencoded 和 json , 資料是json就會用這個middleware 解析
-app.use(bodyParser.json());
+// post 傳送格式有兩種 urlencoded 和 json 
+app.use(bodyParser.urlencoded({ extended: false })); //解析urlencoded格式 
+app.use(bodyParser.json()); //解析json格式
+
 
 //設定session
 app.use(session({
@@ -45,14 +72,16 @@ app.use(session({
     }
 }));
 
+
 // 取得登入的狀態
 app.use((req, res, next) => {
     //res.locals 會自動傳到temp那邊
     res.locals.isLogin = req.session.loginUser || false;
     res.locals.loginData = req.session.loginData || false;
-    next();
+    next(); //才會繼續往下走
 })
 
+//上傳檔案
 //upload.single('前端input名') single=>只有一個檔案
 app.post('/try-upload', upload.single('avatar'), (req, res) => {
     console.log(req.file)
@@ -66,11 +95,11 @@ app.post('/try-upload', upload.single('avatar'), (req, res) => {
     //確認上傳檔案 跟 上傳檔案原始名 是否存在
     if (req.file && req.file.originalname) {
 
-        switch (req.file.mimetype) {
+        switch (req.file.mimetype) { //mimetype=>檔案類型
             case 'image/jpeg':
             case 'image/png':
             case 'image/gif':
-                //rename 搬移檔案 及 更改檔案名
+                //fs裡的rename方法=>搬移檔案 及 更改檔案名
                 fs.rename(req.file.path, './public/img/' + req.file.originalname, error => {
                     //有誤的話
                     if (error) {
@@ -83,20 +112,17 @@ app.post('/try-upload', upload.single('avatar'), (req, res) => {
                     }
                     res.json(output);
                 });
-
                 break;
-
             default:
+                //fs.unlink => 刪除暫存的圖片
                 fs.unlink(req.file.path, error => {
                     output.msg = '不接受式這種檔案格';
                     res.json(output);
                 });
         }
-
     } else {
         res.json(output);
     }
-
 })
 
 
@@ -116,15 +142,9 @@ app.get('/', (req, res) => {
 
 // 把 urlencodedParser 當 middleware => 解析post的參數
 // app.post('/try-post-form', urlencodedParser, (req, res) => {
-//     //req.body => rlencodedParser 解析參數後產生的 
+//     //req.body => urlencodedParser 解析參數後產生的 post的參數
 //     res.json(req.body);
 // });
-
-
-//進入頁面 傳送模板 get
-app.get('/try-post-form', (req, res) => {
-    res.render('try-post-form');
-});
 
 
 //若使用top level middleware 則不用放中間的參數
@@ -132,6 +152,12 @@ app.get('/try-post-form', (req, res) => {
 app.post('/try-post-form', (req, res) => {
     res.render('try-post-form', req.body);
 
+});
+
+
+//進入頁面 傳送模板 get
+app.get('/try-post-form', (req, res) => {
+    res.render('try-post-form');
 });
 
 
@@ -143,21 +169,39 @@ app.get('/data-sales/1', (req, res) => {
 
     //res.json() =>  把物件轉成json文字
     // res.json(data)
-
     res.render('sales', { data: data })
 })
 
-// url.parse(req.url, 是否解析get的參數) => 會回傳一個obj
+//TODO req.baseUrl 是什麼
+
+//url.parse(req.url, 是否解析get的參數) => 會回傳一個obj
 //url.parse 只會解析path
-app.get('/try-qs', (req, res) => {
+app.get('/try-qs/abc', (req, res) => {
+    console.log(req.url); //=> try-qs/abc?name=apple
     const urlQs = url.parse(req.url, true);
-    console.log(urlQs);
-    console.log(urlQs.query.name);
+    console.log('base', req.baseUrl);
+    console.log('urlQs', urlQs);
+    /*urlQs Url {
+        protocol: null,
+        slashes: null,
+        auth: null,
+        host: null,
+        port: null,
+        hostname: null,
+        hash: null,
+        search: '?name=apple',
+        query: [Object: null prototype] { name: 'apple' },
+        pathname: '/try-qs/abc',
+        path: '/try-qs/abc?name=apple',
+        href: '/try-qs/abc?name=apple'
+    } */
+    console.log('urlQs.query.name', urlQs.query.name); // => apple
     res.json(urlQs);
 })
 
 //若要整個解析網址 要用以下方式
 app.get('/try-url', (req, res) => {
+    //req.protocol => http or https, req.get('host') => 主機名稱+prot號
     res.write(req.protocol + '://' + req.get('host') + req.url + '\n');
     res.write(req.protocol + '\n');
     res.write(req.get('host') + '\n');
@@ -165,6 +209,7 @@ app.get('/try-url', (req, res) => {
     res.end('');
 });
 
+//延遲5秒傳送資料
 app.get('/sync-async', (req, res) => {
     setTimeout(() => {
         res.send('Hello 123');
@@ -172,18 +217,22 @@ app.get('/sync-async', (req, res) => {
 
 });
 
+
+//http://localhost:3000/my-params/edit/05 =>
+// {"action":"edit","id":"05"} => req.params回傳一個物件
+// req.params.action='edit' , req.params.id='05'(是字串)
 app.get('/my-params/:action/:id', (req, res) => {
     res.json(req.params);
 });
-//http://localhost:3000/my-params/edit/05 =>
-// {"action":"edit","id":"05"} => req.params回傳一個物件
+
 
 //09 前面記得要加跟目錄->\  -? => 有無- 都可以
 app.get(/^\/09\d{2}-?\d{3}-?\d{3}$/, (req, res) => {
-    let mobile = req.url.slice(1);
-    mobile = mobile.split('?')[0];
+    let mobile = req.url.slice(1); //slice(idx)=> 複製開始到結束點（結束點不算）中的內容 從(1)開始是為了去掉'/'
+    mobile = mobile.split('?')[0];//怕後面有帶參數 從?開始切 取第1個
     mobile = mobile.split('-').join("");
     //.join("") => 陣列每一個連接起來 可以填入要用什麼連接
+    //.join('-') => 0912-345-678
     res.json(mobile);
 });
 
@@ -200,7 +249,7 @@ app.get('/try-session', (req, res) => {
     });
 });
 
-
+//連接資料庫 不常用的做法?
 app.get('/try-db', (req, res) => {
     const sql = "SELECT * FROM `students`";
     db.query(sql, (error, result, fields) => {
@@ -219,10 +268,10 @@ app.get('/abc', (req, res) => {
     res.send('由/abc進來的')
 })
 
-
 app.get('/abc/123', (req, res) => {
     res.send('由/abc/123進來的')
 })
+
 //方法1.路由從外面引進 => 通常不這樣用
 const admin1fn = require(__dirname + '/../admins/admin1');
 admin1fn(app);
@@ -233,6 +282,7 @@ app.use(admin2Router);
 
 //方法3.
 app.use('/admin3/', require(__dirname + '/../admins/admin3'));
+
 
 //登入測試
 app.use('/login-test', require(__dirname + '/../routers/login-test'));
