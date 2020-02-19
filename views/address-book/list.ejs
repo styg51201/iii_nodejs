@@ -1,0 +1,101 @@
+<%- include('../parts/header') %>
+
+<%- include('../navbar') %>
+
+<div class="container">
+    <div class="row">
+        <div class="col">
+            <table class="table table-striped table-bordered">
+                <thead>
+                    <tr>
+                        <th scope="col">刪除</th>
+                        <th scope="col">#</th>
+                        <th scope="col">姓名</th>
+                        <th scope="col">性別</th>
+                        <th scope="col">生日</th>
+                        <th scope="col">電話</th>
+                        <th scope="col">介紹</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% for(let i=0; i<rows.length; i++){ %>
+                    <tr>
+                        <!-- 方法一 -->
+                        <!-- <td><a class="removeLink" href="/address-book/del/<%= rows[i].id %>">刪除</a></td> -->
+                        <!-- 方法二 javascript:removeItem() 是一個假連結 等於執行這個函式-->
+                        <td><a class="removeLink" href="javascript:removeItem(<%= rows[i].id %>)">刪除</a></td>
+                        <td><%= rows[i].id %></td>
+                        <td><%= rows[i].studentName %></td>
+                        <td><%= rows[i].studentGender %></td>
+                        <td><%= rows[i].studentBirthday %></td>
+                        <td><%= rows[i].studentPhoneNumber %></td>
+                        <td><%= rows[i].studentDescription %></td>
+                    </tr>
+                    <% } %>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col">
+            <nav aria-label="Page navigation example">
+                <ul class="pagination">
+                    <li class="page-item <%= 1===page ? 'disabled' :'' %>">
+                        <a class="page-link" href="/address-book/list/<%= page-1 %>" aria-label="Previous">
+                            <span aria-hidden="true">&laquo;</span>
+                        </a>
+                    </li>
+                    <% for(let i = 1;i<=totalPages;i++){ %>
+                    <li class="page-item <%= i===page ? 'active' :'' %>"><a class="page-link"
+                            href="/address-book/list/<%= i %>"><%= i %></a></li>
+                    <% } %>
+
+                    <li class="page-item <%= totalPages===page ? 'disabled' :'' %>">
+                        <a class="page-link" href="/address-book/list/<%= page+1 %>" aria-label="Next">
+                            <span aria-hidden="true">&raquo;</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+    </div>
+    <script>
+
+        //方法一
+        // const removeLinks = $('.removeLink');
+        // removeLinks.click(function (event) {
+        //     const me = $(this);
+        //     const link = $(this).attr('href')
+        //     console.log(link);
+
+        //     //取消連結
+        //     event.preventDefault();
+        //     $.post(link, function (data) {
+        //         console.log(data)
+        //         // me.closest('tr').remove();
+        //         // location.reload();
+        //     }, 'json');
+        // });
+
+
+        //方法二
+        function removeItem(sid) {
+            if (confirm(`確定要刪除編號 ${sid} 的項目嗎?`)) {
+                fetch('/address-book/del/' + sid, {
+                    method: 'POST'
+                })
+                    .then(r => r.json())
+                    .then(obj => {
+                        console.log(obj)
+                        location.reload();
+                    })
+            }
+        }
+
+    </script>
+
+
+
+</div>
+<%- include('../parts/footer') %>

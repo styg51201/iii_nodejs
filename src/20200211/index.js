@@ -7,11 +7,17 @@ const bodyParser = require('body-parser');
 
 const session = require('express-session');
 
+const moment = require('moment-timezone');
+
 const multer = require('multer')
+
+const db = require(__dirname + '/db_connect');
 
 // 設定上傳暫存目錄
 const upload = multer({ dest: 'tmp_uploads/' })
 
+//察看電腦環境?
+// console.log(process.env)
 
 // 取得 urlencoded parser 用來解析參數用的, false =>不使用 qs lib, 而使用內建的 querystring lib
 //放在中間的 
@@ -38,6 +44,14 @@ app.use(session({
         maxAge: 1200000 //// 存活時間20分鐘，單位毫秒
     }
 }));
+
+// 取得登入的狀態
+app.use((req, res, next) => {
+    //res.locals 會自動傳到temp那邊
+    res.locals.isLogin = req.session.loginUser || false;
+    res.locals.loginData = req.session.loginData || false;
+    next();
+})
 
 //upload.single('前端input名') single=>只有一個檔案
 app.post('/try-upload', upload.single('avatar'), (req, res) => {
@@ -187,6 +201,19 @@ app.get('/try-session', (req, res) => {
 });
 
 
+app.get('/try-db', (req, res) => {
+    const sql = "SELECT * FROM `students`";
+    db.query(sql, (error, result, fields) => {
+        if (!error) {
+            console.log(fields) //每一欄的資訊
+            res.json(result);
+        } else {
+            res.end(error);
+        }
+    });
+});
+
+
 
 app.get('/abc', (req, res) => {
     res.send('由/abc進來的')
@@ -209,6 +236,28 @@ app.use('/admin3/', require(__dirname + '/../admins/admin3'));
 
 //登入測試
 app.use('/login-test', require(__dirname + '/../routers/login-test'));
+
+// 通訊錄
+app.use('/address-book', require(__dirname + '/../routers/address-book'));
+
+//時間格式
+app.get('/try-moment', (req, res) => {
+    //定義格式
+    const fm = 'YYYY-MM-DD HH:mm:ss';
+    const m1 = moment(req.session.cookie.expires); //cookie的有效時間
+    const m2 = moment(new Date());//現在的時間
+    const m3 = moment('2018-9-2');//自定義時間
+
+    res.json({
+        m1: m1.format(fm),
+        m2: m2.format(fm),
+        m3: m3.format(fm),
+        m1_: m1.tz('Europe/London').format(fm),
+        m2_: m2.tz('Europe/London').format(fm),
+        m3_: m3.tz('Europe/London').format(fm),
+    });
+});
+
 
 
 //靜態內容資料夾

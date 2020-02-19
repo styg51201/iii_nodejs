@@ -1,8 +1,15 @@
 <%- include('parts/header') %>
 
 <%- include('navbar') %>
+
 <div class="container">
-    <form method="post">
+    <% if( locals.loginData ){ %>
+    <div>
+        <p><%= loginData.nickname %> , hello</p>
+        <p><a href="/login-test/logout">登出</a></p>
+    </div>
+    <% }  else{ %>
+    <form method="post" onsubmit="return formCheck()">
         <div class="form-group">
             <label for="user">User</label>
             <input type="text" class="form-control" id="user" name="user" aria-describedby="emailHelp">
@@ -14,5 +21,51 @@
 
         <button type="submit" class="btn btn-primary">Submit</button>
     </form>
+    <script>
+        function formCheck() {
+            // TODO: 檢查欄位有沒有值, 格式對不對
+
+            //JQ
+            //$.post('./login', {user: "", password: ""}, function(data){
+
+            /*
+            $.post('./login', $('form').serialize(), function (data) {
+                if (data.success) {
+                    location.reload();
+                    // location.href = location.href;
+                } else {
+                    alert(data.msg);
+                }
+
+            }, 'json');
+            */
+
+            fetch('./login', {
+                method: 'POST',
+                body: JSON.stringify({
+                    user: document.querySelector('#user').value,
+                    password: document.querySelector('#password').value,
+                }),
+                //fetch 要自己設定擋頭 ,jq會幫你判斷
+                //不設定就是預設 text 的type
+                //傳回來的json就被轉成文字的
+                //後面就不能用json的方法
+                headers: {
+                    'content-type': 'application/json'
+                }
+            })
+                .then(r => r.json())
+                .then(obj => {
+                    if (obj.success) {
+                        location.reload();
+                    } else {
+                        alert(obj.msg);
+                    }
+                })
+            return false;
+        }
+    </script>
+    <% } %>
+
 </div>
 <%- include('parts/footer') %>
