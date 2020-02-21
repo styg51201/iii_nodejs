@@ -1,17 +1,35 @@
 
 //1. 引 入 express
 const express = require('express')
+
 const url = require('url')
+
+//檔案系統
 const fs = require('fs')
+
+//解析POST參數
 const bodyParser = require('body-parser');
 
+//session
 const session = require('express-session');
 
+//時間格式
 const moment = require('moment-timezone');
 
+//
 const multer = require('multer')
 
+//連線資料庫
 const db = require(__dirname + '/db_connect');
+
+//爬蟲用?
+const axios = require('axios');
+
+//解壓縮用
+const zlib = require('zlib');
+
+//JQ
+const cheerio = require('cheerio');
 
 //跨網域使用
 const cors = require('cors');
@@ -34,7 +52,7 @@ const whitelist = [
     'http://localhost:3000', //自己的主機也要加
     'http://localhost:5500',
     'http://127.0.0.1:5500', //vs code 
-    undefined, //有時候會把主機判斷成是undefined
+    undefined, // 若不是透過ajax或fatch連線 而是直接造訪 會被判斷為undefined
 ];
 
 const corsOptions = {
@@ -72,7 +90,7 @@ app.use(session({
     }
 }));
 
-
+//use => 所有的路徑及方法(get,post)都會跑進來
 // 取得登入的狀態
 app.use((req, res, next) => {
     //res.locals 會自動傳到temp那邊
@@ -290,6 +308,9 @@ app.use('/login-test', require(__dirname + '/../routers/login-test'));
 // 通訊錄
 app.use('/address-book', require(__dirname + '/../routers/address-book'));
 
+//作業
+app.use('/homework', require(__dirname + '/../routers/homework'));
+
 //時間格式
 app.get('/try-moment', (req, res) => {
     //定義格式
@@ -297,17 +318,72 @@ app.get('/try-moment', (req, res) => {
     const m1 = moment(req.session.cookie.expires); //cookie的有效時間
     const m2 = moment(new Date());//現在的時間
     const m3 = moment('2018-9-2');//自定義時間
+    const m4 = moment()//現在時間
 
     res.json({
         m1: m1.format(fm),
         m2: m2.format(fm),
         m3: m3.format(fm),
+        m4: m4.format(fm),
         m1_: m1.tz('Europe/London').format(fm),
         m2_: m2.tz('Europe/London').format(fm),
         m3_: m3.tz('Europe/London').format(fm),
     });
 });
 
+//爬蟲
+app.get('/try-axios', (req, res) => {
+    axios.get('https://tw.yahoo.com/')
+        .then(response => { //response 包含http的檔頭跟body
+            res.end(response.data); //回傳的資料是在.data裡
+        })
+});
+
+app.get('/try-bus', (req, res) => {
+    axios({
+        method: 'get',
+        url: 'https://tcgbusfs.blob.core.windows.net/blobbus/GetBusData.gz', //資料給的是壓縮檔
+        responseType: 'stream' //二維碼 (不是文字)
+    })
+        .then(response => {
+            res.writeHead(200, {
+                'Content-Type': 'text/json; charset=UTF-8'
+            });
+            //pipe => 給stream用的 作為流向使用?
+            //zlib.createGunzip() =>　用來解壓縮的
+            //pipe(res) => 流到res裡 所以要自己寫檔頭 => res.writeHead
+            response.data.pipe(zlib.createGunzip()).pipe(res);
+        })
+});
+
+//JQ 產生dom的原生物件
+app.get('/try-cheerio', (req, res) => {
+    const $ = cheerio.load('<h2>Abc<span>def</span></h2>');
+
+    $('span').css('color', 'red');
+
+    res.end($.html());
+});
+
+//爬YAHOO的資料抓取圖片
+app.get('/try-cheerio2', (req, res) => {
+    axios.get('https://tw.yahoo.com/')
+        .then(response => {
+            const $ = cheerio.load(response.data);//抓回來的資料變成dom的物件
+            const ar = [];
+            const imgs = $('img'); //選取所有圖片
+
+            for (let i = 0; i < imgs.length; i++) {
+                ar.push(imgs.eq(i).attr('src'));
+            }
+            //res.send( ar.join('<br>') );
+            res.send(
+                ar.map((el) => {
+                    return `<img src="${el}"><br>`;
+                }).join('')
+            )
+        })
+});
 
 
 //靜態內容資料夾

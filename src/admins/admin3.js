@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 
+
 // router.route('路徑') => 先設定哪個路由
 router.route('/member/edit/:id?')
     //再定義是哪個方法進來的

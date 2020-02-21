@@ -1,0 +1,95 @@
+<%- include('../parts/header') %>
+
+<%- include('hwNavbar') %>
+
+<div class="container">
+    <div class="row">
+        <div class="col">
+            <div id="info" class="alert alert-success" role="alert" style="display: none">
+
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-6">
+
+            <div class="card mt-5" style="">
+                <div class="card-body">
+
+                    <h5 class="card-title">修改資料</h5>
+
+                    <form name="form1" method="post" enctype="multipart/form-data" onsubmit="return formCheck()">
+
+                        <div class="form-group">
+                            <label for="name">廣告名稱</label>
+                            <input type="text" class="form-control" id="name" name="name" value="<%= row.name %>">
+                        </div>
+                        <div class="form-group">
+                            <label for="place">廣告位置</label>
+                            <input type="text" class="form-control" id="place" name="place" value="<%= row.place %>">
+                        </div>
+                        <div class="form-group">
+                            <p>狀態設定</p>
+                            <div class="border rounded p-2 d-flex justify-content-between">
+                                <div>
+                                    <input type="radio" name="status" id="check" value="審核" style="margin-right:20px"
+                                        <% if(row.status == '審核') { %> checked <% } %>><label for="check">審核</label>
+                                </div>
+                                <div>
+                                    <input type="radio" name="status" id="on" value="上架" style="margin-right:20px"
+                                        <% if(row.status == '上架') { %> checked <% } %>><label for="on">上架</label>
+                                </div>
+                                <div>
+                                    <input type="radio" name="status" id="down" value="下架" style="margin-right:20px"
+                                        <% if(row.status == '下架') { %> checked <% } %>><label for="down">下架</label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="startTime">開始日期</label>
+                            <input type="date" class="form-control" id="startTime" name="startTime"
+                                value="<%= row.startTime %>">
+                        </div>
+                        <div class="form-group">
+                            <label for="dueTime">結束日期</label>
+                            <input type="date" class="form-control" id="dueTime" name="dueTime"
+                                value="<%= row.dueTime %>">
+                        </div>
+
+                        <button type="button" class="btn btn-primary">Submit</button>
+                    </form>
+
+                </div>
+            </div>
+        </div>
+        <script>
+            const info = $('#info');
+
+
+            info.hide();
+
+            $('.btn').on('click', function () {
+                fetch('/homework/edit/<%= row.id %>', {
+                    method: 'POST',
+                    body: new FormData(document.form1),
+                })
+                    .then(r => r.json())
+                    .then(obj => {
+                        console.log(obj);
+                        if (obj.success) {
+                            info.text('修改成功!! 2秒後返回列表頁');
+                            info.removeClass('alert-danger').addClass('alert-success');
+                            setTimeout(() => { location.href = "/homework/list" }, 2000)
+                        } else {
+                            info.text(obj.error);
+                            info.removeClass('alert-success').addClass('alert-danger');
+                            setTimeout(() => { info.hide() }, 2000)
+                        }
+                        info.slideDown();
+                    })
+            })
+        </script>
+
+    </div>
+    <%- include('../parts/footer') %>

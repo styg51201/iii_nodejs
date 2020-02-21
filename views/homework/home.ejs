@@ -1,0 +1,50 @@
+<%- include('../parts/header') %>
+
+<%- include('hwNavbar') %>
+
+<div class="container">
+    <div class="row my-3">
+        <div class="col">
+            <% if(locals.loginData) { %>
+            <h2></h2>
+            <a href="/homework/list" class="btn btn-primary">進入列表</a>
+
+            <% } else{ %>
+            <form name="form1" method="post">
+                <div class="form-group">
+                    <label for="user">User</label>
+                    <input type="text" class="form-control" id="user" name="user" aria-describedby="emailHelp">
+                </div>
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" class="form-control" id="password" name="password">
+                </div>
+
+                <button type="button" class="btn btn-primary submit">Submit</button>
+            </form>
+
+            <%= } %>
+        </div>
+    </div>
+
+
+
+    <script>
+        $('.submit').on('click', function () {
+            fetch('/homework', {
+                method: 'POST',
+                body: new FormData(document.form1)
+            })
+                .then(r => r.json())
+                .then(obj => {
+
+                })
+        })
+
+
+    </script>
+
+
+
+</div>
+<%- include('../parts/footer') %>

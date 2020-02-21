@@ -9,6 +9,12 @@ var db = mysql.createConnection({
 });
 db.connect(); // 連 線
 
+//node 的事件監聽 
+db.on('error', (event) => {
+    console.log(event);
+});
+
+
 bluebird.promisifyAll(db);
 
 module.exports = db;
