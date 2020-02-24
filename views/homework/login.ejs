@@ -6,8 +6,9 @@
     <div class="row my-3">
         <div class="col">
             <% if(locals.loginData) { %>
-            <h2></h2>
-            
+
+            <h3><%= loginData.name %> , 你好</h3>
+            <a class="btn btn-primary" href="/homework/logout">登出</a>
 
             <% } else { %>
             <form name="form1" method="post" enctype="multipart/form-data">
@@ -27,8 +28,6 @@
         </div>
     </div>
 
-
-
     <script>
         $('.submit').on('click', function () {
             fetch('/homework', {
@@ -37,8 +36,7 @@
             })
                 .then(r => r.json())
                 .then(obj => {
-                    console.log(obj)
-                    location.reload();
+                    location.reload()
                 })
         })
 

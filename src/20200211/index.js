@@ -58,7 +58,7 @@ const whitelist = [
 const corsOptions = {
     credentials: true,
     origin: function (origin, callback) {
-        console.log('origin:', origin);
+        // console.log('origin:', origin);
         if (whitelist.indexOf(origin) !== -1) {
             callback(null, true); // true允許拜訪
         } else {

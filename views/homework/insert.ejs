@@ -76,7 +76,7 @@
                         if (obj.success) {
                             info.text('新增成功!! 2秒後返回列表頁');
                             info.removeClass('alert-danger').addClass('alert-success');
-                            setTimeout(() => { location.href = "/homework" }, 2000)
+                            setTimeout(() => { location.href = "/homework/list" }, 2000)
                         } else {
                             info.text(obj.error);
                             info.removeClass('alert-success').addClass('alert-danger');
