@@ -48,17 +48,18 @@ const upload = multer({ dest: 'tmp_uploads/' })
 const app = express()
 
 const whitelist = [
-    'http://localhost:63342', //phpstone
+    'http://localhost:63342', //phpStone
     'http://localhost:3000', //自己的主機也要加
     'http://localhost:5500',
     'http://127.0.0.1:5500', //vs code 
+    'http://localhost:3300',
     undefined, // 若不是透過ajax或fatch連線 而是直接造訪 會被判斷為undefined
 ];
 
 const corsOptions = {
     credentials: true,
     origin: function (origin, callback) {
-        // console.log('origin:', origin);
+        console.log('origin:', origin);
         if (whitelist.indexOf(origin) !== -1) {
             callback(null, true); // true允許拜訪
         } else {
@@ -164,6 +165,23 @@ app.get('/', (req, res) => {
 //     res.json(req.body);
 // });
 
+//SSE測試
+app.get('/try-sse', (req, res) => {
+    let id = 30;
+    res.writeHead(200, {
+        'Content-Type': 'text/event-stream',
+        'Cache-Control': 'no-cache',
+        'Connection': 'keep-alive',
+    });
+    //setInterval的做法不好,會佔資源,即使用戶端斷線,程式也還會運作
+    setInterval(function () {
+        let now = new Date();
+        //只能用write
+        res.write('id: ' + id++ + '\n');
+        res.write('data: ' + now.toLocaleString() + '\n\n');
+    }, 2000);
+});
+
 
 //若使用top level middleware 則不用放中間的參數
 //把填寫的資料傳到模板裡  post
@@ -267,7 +285,7 @@ app.get('/try-session', (req, res) => {
     });
 });
 
-//連接資料庫 不常用的做法?
+//連接資料庫 不常用的做法
 app.get('/try-db', (req, res) => {
     const sql = "SELECT * FROM `students`";
     db.query(sql, (error, result, fields) => {

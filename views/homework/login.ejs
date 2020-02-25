@@ -30,7 +30,7 @@
 
     <script>
         $('.submit').on('click', function () {
-            fetch('/homework', {
+            fetch('http://localhost:3000/homework', {
                 method: 'POST',
                 body: new FormData(document.form1)
             })
