@@ -20,37 +20,30 @@ const loginList = {
 
 router.route('/')
     .get((req, res) => {
-        const login = {
-            loginData: req.session.loginData || false
-        }
-        res.render('homework/login', { login })
-    })
-    .post(upload.none(), (req, res) => {
-        if (req.body.user && req.body.password) {
-            if (loginList[req.body.user] && req.body.password === loginList[req.body.user].pw) {
-
-                req.session.loginUser = req.body.user;
-                req.session.loginData = loginList[req.body.user];
-
-                return res.json({
-                    success: true,
-                    msg: '登入成功',
-                    body: req.body,
-                    name: loginList[req.body.user].name
-                });
+        if (req.session.loginData) {
+            const login = {
+                loginData: req.session.loginData || false
             }
+            res.render('homework/login', { login })
+        } else {
+            res.redirect('/homework-login.html')
         }
-        res.json({
-            success: false,
-            msg: '登入失敗',
-            body: req.body
-        })
     })
+
+router.post('/login', upload.none(), (req, res) => {
+    req.session.loginUser = req.body.user;
+    req.session.loginData = loginList[req.body.user];
+    console.log(req.session)
+    res.json({
+        success: true,
+        msg: '登入成功',
+        body: req.body
+    })
+})
 
 router.use((req, res, next) => {
     if (!req.session.loginUser) {
-        res.redirect(req.baseUrl)
-
+        res.redirect('/homework-login.html')
     } else {
         next();
     }
@@ -207,7 +200,7 @@ router.get('/list/:page?', (req, res) => {
 router.get('/logout', (req, res) => {
     delete req.session.loginUser
     delete req.session.loginData
-    res.redirect(req.baseUrl)
+    res.redirect('/homework-login.html')
 
 });
 

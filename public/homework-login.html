@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <title>Title</title>
     <link rel="stylesheet" href="bootstrap/css/bootstrap.css">
-    <script src="javascripts/jquery-3.4.1.js"></script>
+    <script src="js/jquery-3.4.1.min.js"></script>
     <script src="bootstrap/js/bootstrap.js"></script>
 </head>
 
@@ -25,17 +25,30 @@
     </form>
 
     <script>
+
         $('.submit').on('click', function () {
             fetch('http://localhost:3300/homework/login', {
                 method: 'POST',
-                body: user:
+                body: new FormData(document.form1)
             })
                 .then(r => r.json())
                 .then(obj => {
-                    location.reload()
+                    if (obj.success) {
+                        fetch('/homework/login', {
+                            method: 'POST',
+                            body: new FormData(document.form1)
+                        })
+                            .then(r => r.json())
+                            .then(obj => {
+                                if (obj.success) {
+                                    location.href = "/homework"
+                                }
+                            })
+                    } else {
+                        console.log(obj)
+                    }
                 })
         })
-
 
     </script>
 </body>
